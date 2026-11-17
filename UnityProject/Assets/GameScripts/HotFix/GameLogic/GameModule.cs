@@ -60,9 +60,8 @@ public class GameModule
     /// <summary>
     /// 获取UI模块。
     /// </summary>
-    public static UIModule UI => _ui ??= UIModule.Instance;
-
-    private static UIModule _ui;
+    // 实例归 Singleton<T> 管理，避免单独释放后入口仍持有旧对象。
+    public static UIModule UI => UIModule.Instance;
 
     /// <summary>
     /// 获取场景模块。
@@ -100,19 +99,28 @@ public class GameModule
         return module;
     }
     
+    /// <summary>
+    /// 释放热更新业务对象并清空入口缓存。框架模块仍由 ModuleSystem 管理。
+    /// </summary>
     public static void Shutdown()
     {
         Log.Info("GameModule Shutdown");
-            
-        _base = null;
-        _debugger = null;
-        _fsm = null;
-        _procedure = null;
-        _resource = null;
-        _audio = null;
-        _ui = null;
-        _scene = null;
-        _timer = null;
-        _localization = null;
+
+        try
+        {
+            SingletonSystem.Release();
+        }
+        finally
+        {
+            _base = null;
+            _debugger = null;
+            _fsm = null;
+            _procedure = null;
+            _resource = null;
+            _audio = null;
+            _scene = null;
+            _timer = null;
+            _localization = null;
+        }
     }
 }

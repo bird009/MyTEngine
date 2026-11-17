@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Internal;
 using Object = UnityEngine.Object;
@@ -12,6 +11,7 @@ namespace TEngine
     {
         private GameObject _entity;
         private MainBehaviour _behaviour;
+        private bool _isShuttingDown;
 
         public override void OnInit()
         {
@@ -23,17 +23,32 @@ namespace TEngine
         /// </summary>
         public override void Shutdown()
         {
-            if (_behaviour != null)
+            if (_isShuttingDown)
             {
-                _behaviour.Release();
+                return;
             }
 
-            if (_entity != null)
+            _isShuttingDown = true;
+            try
             {
-                Object.Destroy(_entity);
-            }
+                if (_behaviour != null)
+                {
+                    // 必须在清空委托前通知业务清理；OnDestroy 通过同一入口避免重复通知。
+                    _behaviour.NotifyDestroy();
+                    _behaviour.Release();
+                }
 
-            _entity = null;
+                if (_entity != null)
+                {
+                    Object.Destroy(_entity);
+                }
+            }
+            finally
+            {
+                _entity = null;
+                _behaviour = null;
+                _isShuttingDown = false;
+            }
         }
 
         #region 控制协程Coroutine
@@ -128,12 +143,6 @@ namespace TEngine
         public void AddUpdateListener(Action action)
         {
             _MakeEntity();
-            AddUpdateListenerImp(action).Forget();
-        }
-
-        private async UniTaskVoid AddUpdateListenerImp(Action action)
-        {
-            await UniTask.Yield();
             _behaviour.AddUpdateListener(action);
         }
 
@@ -144,12 +153,6 @@ namespace TEngine
         public void AddFixedUpdateListener(Action action)
         {
             _MakeEntity();
-            AddFixedUpdateListenerImp(action).Forget();
-        }
-
-        private async UniTaskVoid AddFixedUpdateListenerImp(Action action)
-        {
-            await UniTask.Yield(PlayerLoopTiming.LastEarlyUpdate);
             _behaviour.AddFixedUpdateListener(action);
         }
 
@@ -160,12 +163,6 @@ namespace TEngine
         public void AddLateUpdateListener(Action action)
         {
             _MakeEntity();
-            AddLateUpdateListenerImp(action).Forget();
-        }
-
-        private async UniTaskVoid AddLateUpdateListenerImp(Action action)
-        {
-            await UniTask.Yield();
             _behaviour.AddLateUpdateListener(action);
         }
 
@@ -175,8 +172,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveUpdateListener(Action action)
         {
-            _MakeEntity();
-            _behaviour.RemoveUpdateListener(action);
+            _behaviour?.RemoveUpdateListener(action);
         }
 
         /// <summary>
@@ -185,8 +181,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveFixedUpdateListener(Action action)
         {
-            _MakeEntity();
-            _behaviour.RemoveFixedUpdateListener(action);
+            _behaviour?.RemoveFixedUpdateListener(action);
         }
 
         /// <summary>
@@ -195,8 +190,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveLateUpdateListener(Action action)
         {
-            _MakeEntity();
-            _behaviour.RemoveLateUpdateListener(action);
+            _behaviour?.RemoveLateUpdateListener(action);
         }
 
         #endregion
@@ -219,8 +213,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveDestroyListener(Action action)
         {
-            _MakeEntity();
-            _behaviour.RemoveDestroyListener(action);
+            _behaviour?.RemoveDestroyListener(action);
         }
 
         /// <summary>
@@ -239,8 +232,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveOnDrawGizmosListener(Action action)
         {
-            _MakeEntity();
-            _behaviour.RemoveOnDrawGizmosListener(action);
+            _behaviour?.RemoveOnDrawGizmosListener(action);
         }
         
         /// <summary>
@@ -259,8 +251,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveOnDrawGizmosSelectedListener(Action action)
         {
-            _MakeEntity();
-            _behaviour.RemoveOnDrawGizmosSelectedListener(action);
+            _behaviour?.RemoveOnDrawGizmosSelectedListener(action);
         }
 
         /// <summary>
@@ -279,8 +270,7 @@ namespace TEngine
         /// <param name="action"></param>
         public void RemoveOnApplicationPauseListener(Action<bool> action)
         {
-            _MakeEntity();
-            _behaviour.RemoveOnApplicationPauseListener(action);
+            _behaviour?.RemoveOnApplicationPauseListener(action);
         }
 
         #endregion
@@ -307,6 +297,7 @@ namespace TEngine
             private event Action OnDrawGizmosEvent;
             private event Action OnDrawGizmosSelectedEvent;
             private event Action<bool> OnApplicationPauseEvent;
+            private bool _destroyNotified;
 
             void Update()
             {
@@ -334,9 +325,34 @@ namespace TEngine
 
             private void OnDestroy()
             {
-                if (DestroyEvent != null)
+                NotifyDestroy();
+            }
+
+            public void NotifyDestroy()
+            {
+                if (_destroyNotified)
                 {
-                    DestroyEvent();
+                    return;
+                }
+
+                _destroyNotified = true;
+                var callbacks = DestroyEvent;
+                DestroyEvent = null;
+                if (callbacks == null)
+                {
+                    return;
+                }
+
+                foreach (Action callback in callbacks.GetInvocationList())
+                {
+                    try
+                    {
+                        callback();
+                    }
+                    catch (Exception exception)
+                    {
+                        UnityEngine.Debug.LogException(exception);
+                    }
                 }
             }
 

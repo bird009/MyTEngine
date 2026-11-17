@@ -41,7 +41,8 @@ public partial class GameApp
     
     private static void Release()
     {
-        SingletonSystem.Release();
+        GameModule.Shutdown();
+        _hotfixAssembly = null;
         Log.Warning("======= Release GameApp =======");
     }
 }

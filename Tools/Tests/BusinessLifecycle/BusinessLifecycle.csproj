@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Stubs.cs" />
+    <Compile Include="../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/GameModule.cs" Link="GameModule.cs" />
+    <Compile Include="../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/GameApp.cs" Link="GameApp.cs" />
+    <Compile Include="../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/SingletonSystem/*.cs" Link="SingletonSystem/%(Filename)%(Extension)" />
+    <Compile Include="../../../UnityProject/Assets/TEngine/Runtime/Core/Module.cs" Link="Module.cs" />
+    <Compile Include="../../../UnityProject/Assets/TEngine/Runtime/Core/ModuleSystem.cs" Link="ModuleSystem.cs" />
+    <Compile Include="../../../UnityProject/Assets/TEngine/Runtime/Module/UpdataDriver/*.cs" Link="UpdateDriver/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

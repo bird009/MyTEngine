@@ -59,6 +59,7 @@ namespace GameLogic
     /// </summary>
     public static class SingletonSystem
     {
+        internal static bool IsReleasing { get; private set; }
         private static IUpdateDriver _updateDriver;
         private static readonly List<ISingleton> _singletons = new List<ISingleton>();
         private static readonly List<IUpdate> _updates = new List<IUpdate>();
@@ -145,6 +146,9 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 取消登记，由 Singleton.Release 调用；单独释放业务对象请调用其 Release 方法。
+        /// </summary>
         public static void Release(ISingleton singleton)
         {
             if (_singletons != null && _singletons.Contains(singleton))
@@ -211,8 +215,16 @@ namespace GameLogic
 
         public static void Release()
         {
-            if (_gameObjects != null)
+            if (IsReleasing)
             {
+                return;
+            }
+
+            IsReleasing = true;
+            try
+            {
+                // 先取消更新监听，清理过程中不再接收新一帧的业务更新。
+                DeInit();
                 var gameObjectSnapshot = new List<GameObject>(_gameObjects.Values);
                 foreach (var gameObject in gameObjectSnapshot)
                 {
@@ -223,27 +235,33 @@ namespace GameLogic
                 }
 
                 _gameObjects.Clear();
-            }
-
-            if (_singletons != null)
-            {
                 var singletonSnapshot = new List<ISingleton>(_singletons);
                 for (int i = singletonSnapshot.Count - 1; i >= 0; i--)
                 {
-                    singletonSnapshot[i]?.Release();
+                    try
+                    {
+                        singletonSnapshot[i]?.Release();
+                    }
+                    catch (Exception exception)
+                    {
+                        // 一个模块清理失败时，仍需释放其余模块。
+                        Debug.LogException(exception);
+                    }
                 }
-
-                _singletons.Clear();
             }
-
-            _updates.Clear();
-            _fixedUpdates.Clear();
-            _lateUpdates.Clear();
+            finally
+            {
+                _singletons.Clear();
+                _gameObjects.Clear();
+                _updates.Clear();
+                _fixedUpdates.Clear();
+                _lateUpdates.Clear();
 #if UNITY_EDITOR
-            _drawGizmos.Clear();
-            _drawGizmosSelecteds.Clear();
+                _drawGizmos.Clear();
+                _drawGizmosSelecteds.Clear();
 #endif
-            DeInit();
+                IsReleasing = false;
+            }
             Resources.UnloadUnusedAssets();
         }
 
@@ -275,7 +293,7 @@ namespace GameLogic
                 Camera.main.gameObject.SetActive(false);
             }
 
-            Release();
+            GameModule.Shutdown();
             SceneManager.LoadScene(0);
         }
 
@@ -324,13 +342,19 @@ namespace GameLogic
 
             _isInit = false;
 
-            _updateDriver ??= ModuleSystem.GetModule<IUpdateDriver>();
-            _updateDriver.RemoveUpdateListener(OnUpdate);
-            _updateDriver.RemoveFixedUpdateListener(OnFixedUpdate);
-            _updateDriver.RemoveLateUpdateListener(OnLateUpdate);
+            // 清理只能使用原驱动，不能为退订创建新模块；下次初始化重新获取驱动。
+            var updateDriver = _updateDriver;
+            _updateDriver = null;
+            if (updateDriver == null)
+            {
+                return;
+            }
+            updateDriver.RemoveUpdateListener(OnUpdate);
+            updateDriver.RemoveFixedUpdateListener(OnFixedUpdate);
+            updateDriver.RemoveLateUpdateListener(OnLateUpdate);
 #if UNITY_EDITOR
-            _updateDriver.RemoveOnDrawGizmosListener(OnDrawGizmos);
-            _updateDriver.RemoveOnDrawGizmosSelectedListener(OnDrawGizmosSelected);
+            updateDriver.RemoveOnDrawGizmosListener(OnDrawGizmos);
+            updateDriver.RemoveOnDrawGizmosSelectedListener(OnDrawGizmosSelected);
 #endif
         }
 

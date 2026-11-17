@@ -73,6 +73,10 @@ namespace GameLogic
             {
                 if (_instance == null)
                 {
+                    if (SingletonSystem.IsReleasing)
+                    {
+                        throw new System.InvalidOperationException($"Cannot create {typeof(T).FullName} while business modules are shutting down.");
+                    }
                     System.Type thisType = typeof(T);
                     string instName = thisType.Name;
                     GameObject go = SingletonSystem.GetGameObject(instName);

@@ -9,6 +9,7 @@ namespace GameLogic
     public abstract class Singleton<T> : ISingleton where T : Singleton<T>, new()
     {
         protected static T _instance = default(T);
+        private bool _isReleasing;
 
         public static T Instance
         {
@@ -16,6 +17,10 @@ namespace GameLogic
             {
                 if (null == _instance)
                 {
+                    if (SingletonSystem.IsReleasing)
+                    {
+                        throw new System.InvalidOperationException($"Cannot create {typeof(T).FullName} while business modules are shutting down.");
+                    }
                     _instance = new T();
                     _instance.OnInit();
                     SingletonSystem.Retain(_instance);
@@ -49,11 +54,22 @@ namespace GameLogic
 
         public virtual void Release()
         {
-            OnRelease();
-            if (_instance != null)
+            // 旧引用或重入调用不能再次清理，更不能释放此类型的新实例。
+            if (!ReferenceEquals(_instance, this) || _isReleasing)
             {
-                SingletonSystem.Release(_instance);
+                return;
+            }
+
+            _isReleasing = true;
+            try
+            {
+                OnRelease();
+            }
+            finally
+            {
+                SingletonSystem.Release(this);
                 _instance = null;
+                _isReleasing = false;
             }
         }
 
