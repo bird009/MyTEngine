@@ -163,17 +163,41 @@ namespace GameLogic
 {
     public sealed class AdModule : Singleton<AdModule>
     {
+        public static object LoadInterstitialBaseline() => null;
+        public void Configure(object policy, AnalyticsModule analytics) { }
         public int Releases;
         public void InitAdSdk() { }
+        public void ShowInterAd(AdsEntrance entrance) { }
         protected override void OnRelease() { Releases++; }
     }
+    public enum AdsEntrance { LevelComplete }
     public sealed class UIModule : Singleton<UIModule>
     {
         public int Releases;
         public void ShowUIAsync<T>() { }
+        public Task<T> ShowUIAsyncAwait<T>() => Task.FromResult(default(T));
         protected override void OnRelease() { Releases++; }
     }
     public class BattleMainUI { }
     public class AdDebuggerWindow { }
+    public class RemoteConfigDebuggerWindow
+    { public RemoteConfigDebuggerWindow(RemoteConfigModule c, AnalyticsModule a, string b, string e, Action simulate = null) { } }
+    public sealed class AnalyticsModule : Singleton<AnalyticsModule>
+    { public void Initialize(object backend) { } }
+    public sealed class RemoteConfigModule : Singleton<RemoteConfigModule>
+    {
+        public object Interstitial => null;
+        public Task InitializeAsync(object backend, GameServices.FirebaseSettings settings, AnalyticsModule analytics,
+            Func<object> loadBaseline = null) => Task.CompletedTask;
+    }
     public static class GameEventHelper { public static void Init() { } }
 }
+
+namespace GameServices
+{
+    public sealed class FirebaseSettings
+    { public string environment = "test"; public static FirebaseSettings Load() => new FirebaseSettings(); }
+    public sealed class Backend { public string Name => "stub"; }
+    public static class FirebaseRuntime { public static Backend GetBackend(FirebaseSettings settings) => new Backend(); }
+}
+namespace Launcher { public static class LauncherMgr { public static void HideAllUI() { } } }

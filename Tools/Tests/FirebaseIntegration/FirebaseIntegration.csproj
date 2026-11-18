@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <AdModulePath>../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/Module/AdModule</AdModulePath>
+    <DefineConstants Condition="Exists('$(AdModulePath)/AdModule.cs')">$(DefineConstants);TEST_AD_INTEGRATION</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>../../../UnityProject/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Compile Include="../../../UnityProject/Assets/GameScripts/Services/Firebase/*.cs" />
+    <Compile Include="../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/Module/RemoteConfig/*.cs" />
+    <Compile Include="../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/Module/Analytics/*.cs" />
+    <Compile Include="../../../UnityProject/Assets/GameScripts/HotFix/GameLogic/SingletonSystem/Singleton.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('$(AdModulePath)/AdModule.cs')">
+    <Compile Include="$(AdModulePath)/AdModule.cs" />
+    <Compile Include="$(AdModulePath)/AdScheduler.cs" />
+    <Compile Include="$(AdModulePath)/AdType.cs" />
+    <Compile Include="$(AdModulePath)/AdsEntrance.cs" />
+    <Compile Include="$(AdModulePath)/IAdService.cs" />
+  </ItemGroup>
+</Project>

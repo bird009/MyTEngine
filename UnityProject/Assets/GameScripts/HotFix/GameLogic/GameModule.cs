@@ -1,4 +1,4 @@
-﻿using GameLogic;
+using GameLogic;
 using TEngine;
 using Object = UnityEngine.Object;
 
@@ -81,8 +81,14 @@ public class GameModule
     /// 获取本地化模块。
     /// </summary>
     public static ILocalizationModule Localization => _localization ??= Get<ILocalizationModule>();
-    
+
     private static ILocalizationModule _localization;
+    #endregion
+
+    #region 游戏模块
+
+    public static RemoteConfigModule RemoteConfig => RemoteConfigModule.Instance;
+    public static AnalyticsModule Analytics => AnalyticsModule.Instance;
     #endregion
     
     /// <summary>

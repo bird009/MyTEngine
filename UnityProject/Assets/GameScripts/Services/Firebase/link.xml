@@ -1,0 +1,3 @@
+<linker>
+  <assembly fullname="GameServices.Firebase" preserve="all" />
+</linker>

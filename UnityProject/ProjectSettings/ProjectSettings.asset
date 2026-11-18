@@ -165,7 +165,7 @@ PlayerSettings:
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
-  AndroidMinSdkVersion: 22
+  AndroidMinSdkVersion: 24
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1
   aotOptions: 
@@ -180,7 +180,7 @@ PlayerSettings:
   StripUnusedMeshComponents: 0
   VertexChannelCompressionMask: 4054
   iPhoneSdkVersion: 988
-  iOSTargetOSVersionString: 12.0
+  iOSTargetOSVersionString: 15.0
   tvOSSdkVersion: 0
   tvOSRequireExtendedGameController: 0
   tvOSTargetOSVersionString: 12.0
@@ -243,11 +243,11 @@ PlayerSettings:
   templateDefaultScene: Assets/Scenes/SampleScene.unity
   useCustomMainManifest: 0
   useCustomLauncherManifest: 0
-  useCustomMainGradleTemplate: 0
+  useCustomMainGradleTemplate: 1
   useCustomLauncherGradleManifest: 0
   useCustomBaseGradleTemplate: 0
-  useCustomGradlePropertiesTemplate: 0
-  useCustomGradleSettingsTemplate: 0
+  useCustomGradlePropertiesTemplate: 1
+  useCustomGradleSettingsTemplate: 1
   useCustomProguardFile: 0
   AndroidTargetArchitectures: 1
   AndroidTargetDevices: 0
@@ -766,7 +766,7 @@ PlayerSettings:
   webGLDecompressionFallback: 0
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: ENABLE_LOG;TextMeshPro
+    Android: ENABLE_LOG;TextMeshPro;TENGINE_FIREBASE
     EmbeddedLinux: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro
     GameCoreXboxOne: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro
     Lumin: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro
@@ -778,7 +778,7 @@ PlayerSettings:
     WebGL: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;ENABLE_LOG
     Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;ENABLE_LOG
     XboxOne: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro
-    iPhone: ENABLE_LOG;TextMeshPro
+    iPhone: ENABLE_LOG;TextMeshPro;TENGINE_FIREBASE
     tvOS: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro
   additionalCompilerArguments: {}
   platformArchitecture: {}

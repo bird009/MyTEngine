@@ -1,7 +1,4 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using Launcher;
-using TEngine;
+﻿using TEngine;
 
 namespace Procedure
 {
@@ -12,13 +9,7 @@ namespace Procedure
         protected override void OnEnter(IFsm<IProcedureModule> procedureOwner)
         {
             base.OnEnter(procedureOwner);
-            StartGame().Forget();
-        }
-
-        private async UniTaskVoid StartGame()
-        {
-            await UniTask.Yield();
-            LauncherMgr.HideAllUI();
+            // GameApp owns the loading screen until its configuration startup transaction finishes.
         }
     }
 }

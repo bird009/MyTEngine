@@ -1,0 +1,6 @@
+{
+    "name": "GameServices.Firebase",
+    "rootNamespace": "GameServices",
+    "references": [],
+    "autoReferenced": true
+}
