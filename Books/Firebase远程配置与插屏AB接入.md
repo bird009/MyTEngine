@@ -4,10 +4,10 @@
 
 ## 当前交付边界
 
-- Firebase 独立提交包含 SDK、配置与统计模块、启动接入和实验策略。现有广告模块、AdMob SDK 与 Luban 广告表仍在广告工作区。插屏频控、曝光机会与广告回调的接线随广告改动发布，单独检出 Firebase 提交时没有实际插屏实验流量。
+- 广告模块在 Firebase 独立提交之后接入。`GameApp` 先读取 Luban 插屏基线并生成策略，再交给 `AdModule`。业务调用 `ShowInterAd` 时登记曝光机会，广告回调沿用该请求的策略。
 
 - 已实现真实 Firebase SDK 适配器、默认/Editor 模拟适配器、RemoteConfigModule、AnalyticsModule、启动协调、广告策略快照、曝光和结果事件、GM 诊断页。
-- 已从 Google 官方原始 Unity 包导入 Firebase Analytics、Remote Config **14.1.0** 及 App 依赖，EDM4U 统一为 **1.2.190**，移除旧 1.2.186。现有 Google Mobile Ads Unity **11.5.0**、广告业务代码和原 Git 暂存区保留。
+- 已导入 Firebase Analytics、Remote Config **14.1.0** 及 App 依赖，EDM4U 统一为 **1.2.190**。Google Mobile Ads Unity **11.5.0** 随广告模块接入。现有 Android App ID 与广告位使用 [Google 官方测试 ID](https://developers.google.com/admob/unity/test-ads)，iOS 仍需配置相应的 App ID 与广告位。
 - Unity 2022.3.62f3 Editor 编译及 Android Player 脚本编译通过（24 个程序集，包含真实 Firebase 适配器）。此前 19 项配置/广告行为测试和原有 16 项生命周期测试通过。尚未完成 IL2CPP 原生打包、真机和后台联调。
 - EDM4U 强制解析成功，Gradle 7.5.1 / Android Gradle Plugin 7.4.2 的独立 Android runtime 依赖校验成功下载/解析 105 个制品，`checkReleaseAarMetadata` 通过（compileSdk 35 / Build Tools 34.0.0）；这不等同于完整 APK 构建通过。AGP 7.4.2 对 compileSdk 35 的支持范围警告仍存在，本次未改动 Unity 内置工具链。
 - Android/iOS 已添加 `TENGINE_FIREBASE`，保留原有宏。Android 最低 API 24 不变，iOS 最低版本从 12.0 对齐至 15.0。

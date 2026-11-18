@@ -1,4 +1,4 @@
-using GameLogic;
+﻿using GameLogic;
 using TEngine;
 using Object = UnityEngine.Object;
 
@@ -89,6 +89,11 @@ public class GameModule
 
     public static RemoteConfigModule RemoteConfig => RemoteConfigModule.Instance;
     public static AnalyticsModule Analytics => AnalyticsModule.Instance;
+
+    /// <summary>
+    /// 获取广告模块。
+    /// </summary>
+    public static AdModule Ad => AdModule.Instance;
     #endregion
     
     /// <summary>
